@@ -9,11 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7FB11D0D-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{506F982B-3766-4347-B50A-0E2F31630D6F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grpc.BlazorFly", "src\Grpc.BlazorFly\Grpc.BlazorFly.csproj", "{0FAEED0E-3C0C-4FAE-B78C-D6CA8C63337A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorFly.Grpc", "src\BlazorFly.Grpc\BlazorFly.Grpc.csproj", "{0FAEED0E-3C0C-4FAE-B78C-D6CA8C63337A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.Components.Testing", "test\Microsoft.AspNetCore.Components.Testing\Microsoft.AspNetCore.Components.Testing.csproj", "{E9673717-5CD9-44B9-A095-76D502184CD3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grpc.BlazorFly.Tests", "test\Grpc.BlazorFly.Tests\Grpc.BlazorFly.Tests.csproj", "{F72FDDDE-5EFE-490C-A6E8-33B385F75F38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorFly.Grpc.Tests", "test\BlazorFly.Grpc.Tests\BlazorFly.Grpc.Tests.csproj", "{F72FDDDE-5EFE-490C-A6E8-33B385F75F38}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

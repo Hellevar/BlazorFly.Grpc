@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Grpc.BlazorFly\Grpc.BlazorFly.csproj" />
+    <ProjectReference Include="..\..\src\BlazorFly.Grpc\BlazorFly.Grpc.csproj" />
     <ProjectReference Include="..\Microsoft.AspNetCore.Components.Testing\Microsoft.AspNetCore.Components.Testing.csproj" />
   </ItemGroup>
 

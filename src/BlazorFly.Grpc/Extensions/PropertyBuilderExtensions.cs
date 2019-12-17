@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Grpc.BlazorFly.Extensions
+namespace BlazorFly.Grpc.Extensions
 {
     internal static class PropertyBuilderExtensions
     {

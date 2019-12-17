@@ -17,6 +17,6 @@ jobs:
     - name: Unit Tests
       run: dotnet test
     - name: Build NuGet Package
-      run: dotnet pack ./src/Grpc.BlazorFly/Grpc.BlazorFly.csproj --configuration Release --output NuGetPackages
+      run: dotnet pack ./src/BlazorFly.Grpc/BlazorFly.Grpc.csproj --configuration Release --output NuGetPackages
     - name: Deploy NuGet Package
       run: dotnet nuget push ./NuGetPackages/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --no-symbols true

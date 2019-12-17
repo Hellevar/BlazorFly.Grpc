@@ -1,6 +1,6 @@
 ﻿using Grpc.Core;
 
-namespace Grpc.BlazorFly.Internal
+namespace BlazorFly.Grpc.Internal
 {
     internal class GrpcMetadataProvider : IGrpcMetadataProvider
     {

@@ -6,13 +6,13 @@ using System.Reflection.Emit;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Grpc.BlazorFly.Extensions;
-using Grpc.BlazorFly.Utils;
+using BlazorFly.Grpc.Extensions;
+using BlazorFly.Grpc.Utils;
 using Grpc.Core;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
-namespace Grpc.BlazorFly.Builders
+namespace BlazorFly.Grpc.Builders
 {
     internal class ComponentBuilder
     {
@@ -81,10 +81,10 @@ namespace Grpc.BlazorFly.Builders
 
         private TypeBuilder CreateComponentType()
         {
-            var assemblyName = new AssemblyName("Grpc.BlazorFly.GeneratedAssembly");
+            var assemblyName = new AssemblyName("BlazorFly.Grpc.GeneratedAssembly");
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-            var moduleBuilder = assemblyBuilder.DefineDynamicModule("Grpc.BlazorFly.GeneratedModule");
-            var typeBuilder = moduleBuilder.DefineType("Grpc.BlazorFly.GeneratedComponent", TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed);
+            var moduleBuilder = assemblyBuilder.DefineDynamicModule("BlazorFly.Grpc.GeneratedModule");
+            var typeBuilder = moduleBuilder.DefineType("BlazorFly.Grpc.GeneratedComponent", TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed);
             typeBuilder.SetParent(typeof(ComponentBase));
 
             return typeBuilder;

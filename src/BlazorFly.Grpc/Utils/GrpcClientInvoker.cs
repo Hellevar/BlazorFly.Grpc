@@ -6,11 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
 
-[assembly: InternalsVisibleTo("Grpc.BlazorFly.GeneratedAssembly")]
-[assembly: InternalsVisibleTo("Grpc.BlazorFly.Tests")]
+[assembly: InternalsVisibleTo("BlazorFly.Grpc.GeneratedAssembly")]
+[assembly: InternalsVisibleTo("BlazorFly.Grpc.Tests")]
 
-namespace Grpc.BlazorFly.Utils
-{    
+namespace BlazorFly.Grpc.Utils
+{
     internal static class GrpcClientInvoker
     {
         public static string InitializeStringValue<TModel>(JsonSerializerOptions options, bool isList)

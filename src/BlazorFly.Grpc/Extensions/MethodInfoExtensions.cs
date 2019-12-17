@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using Grpc.BlazorFly.Utils;
+using BlazorFly.Grpc.Utils;
 using Grpc.Core;
 
-namespace Grpc.BlazorFly.Extensions
+namespace BlazorFly.Grpc.Extensions
 {
     internal static class MethodInfoExtensions
     {

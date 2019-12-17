@@ -5,9 +5,9 @@
     <Authors>Hellevar</Authors>
     <Version>0.8.0</Version>
     <Company />
-    <Description>Grpc.BlazorFly provides generated blazor component for viewing and interactions with your gRPC services by your provided gRPC client. The main goal is to provide easy to setup and use experience.</Description>
-    <PackageProjectUrl>https://github.com/Hellevar/Grpc.BlazorFly</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Hellevar/Grpc.BlazorFly</RepositoryUrl>
+    <Description>BlazorFly.Grpc provides generated blazor component for viewing and interactions with your gRPC services by your provided gRPC client. The main goal is to provide easy to setup and use experience.</Description>
+    <PackageProjectUrl>https://github.com/Hellevar/BlazorFly.Grpc</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Hellevar/BlazorFly.Grpc</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

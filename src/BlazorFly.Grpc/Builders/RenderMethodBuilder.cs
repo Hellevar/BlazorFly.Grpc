@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace Grpc.BlazorFly.Builders
+namespace BlazorFly.Grpc.Builders
 {
     internal class RenderMethodBuilder
     {
@@ -172,7 +172,7 @@ namespace Grpc.BlazorFly.Builders
             _generator.Emit(OpCodes.Ldstr, baseValue);
             _generator.Emit(OpCodes.Ldarg_0);
             _generator.Emit(OpCodes.Call, conditionGetter);
-            _generator.Emit(OpCodes.Brtrue, endLabel);            
+            _generator.Emit(OpCodes.Brtrue, endLabel);
             _generator.Emit(OpCodes.Ldstr, optionalValue);
             _generator.EmitCall(OpCodes.Call, StringConcatMethod, null);
             _generator.MarkLabel(endLabel);

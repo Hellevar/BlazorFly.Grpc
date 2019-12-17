@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using BlazorFly.Grpc;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 
-namespace Grpc.BlazorFly.Tests.Core
+namespace BlazorFly.Grpc.Tests.Core
 {
     public class TestWrapper : ComponentBase
     {

@@ -1,7 +1,8 @@
 ﻿using System;
-using Grpc.BlazorFly.Builders;
+using BlazorFly.Grpc;
+using BlazorFly.Grpc.Builders;
 
-namespace Grpc.BlazorFly.Internal
+namespace BlazorFly.Grpc.Internal
 {
     internal class GrpcViewTypeProvider : IGrpcViewTypeProvider
     {

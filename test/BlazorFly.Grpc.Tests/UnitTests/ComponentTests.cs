@@ -1,13 +1,13 @@
 ﻿using System.Threading.Tasks;
-using Grpc.BlazorFly.Internal;
-using Grpc.BlazorFly.Tests.Core;
+using BlazorFly.Grpc.Internal;
+using BlazorFly.Grpc.Tests.Core;
 using Grpc.Core;
 using Grpc.Core.Testing;
 using Microsoft.AspNetCore.Components.Testing;
 using Moq;
 using Xunit;
 
-namespace Grpc.BlazorFly.Tests.UnitTests
+namespace BlazorFly.Grpc.Tests.UnitTests
 {
     public class ComponentTests
     {

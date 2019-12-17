@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package Grpc.BlazorFly.Tests;
+package BlazorFly.Grpc.Tests;
 
 service TestService {
   rpc UnaryCall (HelloRequest) returns (HelloResponse);

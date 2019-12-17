@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Grpc.Core;
 
-namespace Grpc.BlazorFly.Tests.Core
+namespace BlazorFly.Grpc.Tests.Core
 {
     public class AsyncStreamReaderStub : IAsyncStreamReader<HelloResponse>
     {

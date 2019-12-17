@@ -1,9 +1,9 @@
 ﻿using System;
-using Grpc.BlazorFly.Internal;
+using BlazorFly.Grpc.Internal;
 using Grpc.Core;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Grpc.BlazorFly
+namespace BlazorFly.Grpc
 {
     public static class ServiceCollectionExtensions
     {

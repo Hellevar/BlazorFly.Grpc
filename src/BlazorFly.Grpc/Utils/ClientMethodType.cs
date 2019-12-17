@@ -1,4 +1,4 @@
-﻿namespace Grpc.BlazorFly.Utils
+﻿namespace BlazorFly.Grpc.Utils
 {
     internal enum ClientMethodType
     {

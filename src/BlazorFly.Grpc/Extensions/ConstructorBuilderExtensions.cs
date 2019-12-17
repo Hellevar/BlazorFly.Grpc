@@ -2,10 +2,10 @@
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.Json;
-using Grpc.BlazorFly.Utils;
+using BlazorFly.Grpc.Utils;
 using Microsoft.AspNetCore.Components;
 
-namespace Grpc.BlazorFly.Extensions
+namespace BlazorFly.Grpc.Extensions
 {
     internal static class ConstructorBuilderExtensions
     {

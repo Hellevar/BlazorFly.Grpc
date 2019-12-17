@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Grpc.BlazorFly
+namespace BlazorFly.Grpc
 {
     public interface IGrpcViewTypeProvider
     {
