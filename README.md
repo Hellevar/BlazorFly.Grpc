@@ -1,1 +1,2 @@
 # Grpc.BlazorFly
+Project details
