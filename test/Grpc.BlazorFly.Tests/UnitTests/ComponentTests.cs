@@ -42,42 +42,6 @@ namespace Grpc.BlazorFly.Tests.UnitTests
         }
 
         [Fact]
-        public void ClearUnaryCallResponse_WhenResponseReceived_ShouldClearResponseMarkup()
-        {
-            // Arrange
-            const string ExpectedMessage = "Unusual Markup Message Unary Call";
-            host.AddService<IGrpcViewTypeProvider>(new GrpcViewTypeProvider(typeof(TestService.TestServiceClient)));
-
-            var clientMock = new Mock<TestService.TestServiceClient>();
-            clientMock.Setup(m => m.UnaryCallAsync(It.IsAny<HelloRequest>(), It.IsAny<CallOptions>()))
-                .Returns(TestCalls.AsyncUnaryCall(
-                Task.FromResult(new HelloResponse { Message = ExpectedMessage }),
-                Task.FromResult(new Metadata()),
-                () => Status.DefaultSuccess,
-                () => new Metadata(),
-                () => { }));
-
-            host.AddService(clientMock.Object);
-            var component = host.AddComponent<TestWrapper>();
-
-            // Act - Phase 1, execute call
-            component.Find("button.execute.unaryCall").Click();
-            host.WaitForNextRender();
-            var markup = component.GetMarkup();
-
-            // Assert - Phase 1, execute call
-            Assert.Contains(ExpectedMessage, markup);
-
-            // Act - Phase 2, clear call response
-            component.Find("button.clear.unaryCall").Click();
-            host.WaitForNextRender();
-            var updatedMarkup = component.GetMarkup();
-
-            // Assert - Phase 2, clear call response
-            Assert.DoesNotContain(ExpectedMessage, updatedMarkup);
-        }
-
-        [Fact]
         public void ExecuteClientStreaming_WhenItMapped_ShouldUpdateResponseMarkup()
         {
             // Arrange

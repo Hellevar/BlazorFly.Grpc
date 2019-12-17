@@ -5,12 +5,15 @@
     <Authors>Hellevar</Authors>
     <Version>0.8.0</Version>
     <Company />
+    <Description>Grpc.BlazorFly provides generated blazor component for viewing and interactions with your gRPC services by your provided gRPC client. The main goal is to provide easy to setup and use experience.</Description>
+    <PackageProjectUrl>https://github.com/Hellevar/Grpc.BlazorFly</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Hellevar/Grpc.BlazorFly</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Grpc.Core.Api" Version="2.25.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.0.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
   </ItemGroup>
 
