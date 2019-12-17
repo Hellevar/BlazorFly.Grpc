@@ -3,30 +3,20 @@ name: Deploy package to Nuget
 on: 
   push:
     branches: master
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: Setup .Net Core
-    - uses: actions/setup-dotnet@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.100
-    - name: Build with dotnet
+    - name: Build
       run: dotnet build --configuration Release
-    - name: Test with dotnet
+    - name: Unit Tests
       run: dotnet test
-  
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Pack nuget Package
-        run: dotnet pack --configuration Release
-      - name: Push package to nuget
-        run: dotnet nuget push **/*.nupkg
-              --api-key ${{ secrets.NUGET_API_KEY }}
-              --source https://api.nuget.org/v3/index.json
-              --no-symbols true
+    - name: Build NuGet Package
+      run: dotnet pack ./src/Grpc.BlazorFly/Grpc.BlazorFly.csproj --configuration Release --output NuGetPackages
+    - name: Deploy NuGet Package
+      run: dotnet nuget push ./src/Grpc.BlazorFly/NuGetPackages/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --no-symbols true
