@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package Grpc.BlazorFly.Tests;
+
+service TestService {
+  rpc UnaryCall (HelloRequest) returns (HelloResponse);
+  rpc ClientStreaming (stream HelloRequest) returns (HelloResponse);
+  rpc ServerStreaming (HelloRequest) returns (stream HelloResponse);
+  rpc DuplexStreaming (stream HelloRequest) returns (stream HelloResponse);
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string message = 1;
+}
