@@ -7,7 +7,7 @@ namespace BlazorFly.Grpc
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddGrpcBlazorFly(this IServiceCollection services, Type clientType, Func<Metadata> defaultMetadata = null)
+        public static void AddBlazorFlyGrpc(this IServiceCollection services, Type clientType, Func<Metadata> defaultMetadata = null)
         {
             services.AddSingleton(typeof(IGrpcViewTypeProvider), new GrpcViewTypeProvider(clientType));
             if (defaultMetadata != null)

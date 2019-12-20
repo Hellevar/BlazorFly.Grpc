@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.25.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\BlazorFly.Grpc\BlazorFly.Grpc.csproj" />
+    <ProjectReference Include="..\ProtoContracts\ProtoContracts.csproj" />
+  </ItemGroup>
+
+</Project>
