@@ -130,18 +130,23 @@ public class Startup
 As you can see on the screens above - there is 4 method, for all gRPC call types.
 Each method representation includes:
 * Request input field
+
 This field contains serialized representation of your request model in the JSON format. Editable field
 
 * Execute button
+
 Press this button to start request processing
 
 * Clear button
+
 Press this button if you want to clear response value field
 
 * Cancel button
+
 Press this button if you want to stop current request processing. Request cancellation token will be used
 
 * Response field
+
 This field contains serialized representation of your response model in the JSON format. Non-editable field
 
 ## Examples
