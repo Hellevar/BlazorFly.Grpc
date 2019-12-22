@@ -123,8 +123,8 @@ public class Startup
 ```
 
 ## Gallery
-![alt text](https://github.com/Hellevar/BlazorFly.Grpc/tree/master/.github/images/overview.png)
-![alt text](https://github.com/Hellevar/BlazorFly.Grpc/tree/master/.github/images/method-call-details.png)
+![Overview](https://raw.github.com/Hellevar/BlazorFly.Grpc/master/.github/images/overview.png)
+![Method processing controls](https://raw.github.com/Hellevar/BlazorFly.Grpc/master/.github/images/method-call-details.png)
 
 ## UI usage
 As you can see on the screens above - there is 4 method, for all gRPC call types.
