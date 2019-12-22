@@ -20,3 +20,4 @@ jobs:
       run: dotnet pack ./src/BlazorFly.Grpc/BlazorFly.Grpc.csproj --configuration Release --output NuGetPackages
     - name: Deploy NuGet Package
       run: dotnet nuget push ./NuGetPackages/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --no-symbols true
+      continue-on-error: true

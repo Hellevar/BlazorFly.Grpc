@@ -122,6 +122,28 @@ public class Startup
 </NavLink>
 ```
 
+## Gallery
+![alt text](https://github.com/Hellevar/BlazorFly.Grpc/tree/master/.github/images/overview.png)
+![alt text](https://github.com/Hellevar/BlazorFly.Grpc/tree/master/.github/images/method-call-details.png)
+
+## UI usage
+As you can see on the screens above - there is 4 method, for all gRPC call types.
+Each method representation includes:
+* Request input field
+This field contains serialized representation of your request model in the JSON format. Editable field
+
+* Execute button
+Press this button to start request processing
+
+* Clear button
+Press this button if you want to clear response value field
+
+* Cancel button
+Press this button if you want to stop current request processing. Request cancellation token will be used
+
+* Response field
+This field contains serialized representation of your response model in the JSON format. Non-editable field
+
 ## Examples
 You can find [example projects](https://github.com/Hellevar/BlazorFly.Grpc/tree/master/examples) which contains more detailed and practical example of setup and usage.
 
