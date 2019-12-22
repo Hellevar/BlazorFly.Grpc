@@ -1,5 +1,5 @@
 ﻿using System;
-using BlazorFly.Grpc;
+using System.Collections.Generic;
 using BlazorFly.Grpc.Builders;
 
 namespace BlazorFly.Grpc.Internal
@@ -8,9 +8,9 @@ namespace BlazorFly.Grpc.Internal
     {
         private readonly Type _componentType;
 
-        public GrpcViewTypeProvider(Type clientType)
+        public GrpcViewTypeProvider(ICollection<Type> clientTypes)
         {
-            _componentType = new ComponentBuilder().Build(clientType);
+            _componentType = new ComponentBuilder().Build(clientTypes);
         }
 
         public Type GetGrpcViewType()

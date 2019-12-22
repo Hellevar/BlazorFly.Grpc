@@ -84,10 +84,14 @@ namespace BlazorFly.Grpc.Extensions
             MethodInfo clientRequestMethod,
             MethodInfo setResponseMethod,
             Type requestType,
-            Type responseType)
+            Type responseType,
+            PropertyInfo metadataProviderProperty,
+            MethodInfo clearResponseMethod)
         {
             var generator = method.GetILGenerator();
 
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Call, clearResponseMethod);
             generator.Emit(OpCodes.Ldarg_0);
             generator.Emit(OpCodes.Call, clientProperty.GetGetMethod());
             generator.Emit(OpCodes.Dup);
@@ -137,6 +141,8 @@ namespace BlazorFly.Grpc.Extensions
             generator.Emit(OpCodes.Ldarg_0);
             generator.Emit(OpCodes.Ldftn, setResponseMethod);
             generator.Emit(OpCodes.Newobj, FuncConstructorMethod);
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Call, metadataProviderProperty.GetGetMethod());
 
             switch (methodType)
             {

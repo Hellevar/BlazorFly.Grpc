@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using BlazorFly.Grpc.Internal;
 using Grpc.Core;
 
 [assembly: InternalsVisibleTo("BlazorFly.Grpc.GeneratedAssembly")]
@@ -34,11 +35,14 @@ namespace BlazorFly.Grpc.Utils
             string requestValue,
             CancellationTokenSource cancellationTokenSource,
             JsonSerializerOptions options,
-            Func<string, Task> responseAction)
+            Func<string, Task> responseAction,
+            IGrpcMetadataProvider metadataProvider)
         {
             ExecuteAndLogError(async () =>
             {
-                var response = await requestAction(JsonSerializer.Deserialize<TRequest>(requestValue), new CallOptions(cancellationToken: cancellationTokenSource.Token));
+                var response = await requestAction(
+                    JsonSerializer.Deserialize<TRequest>(requestValue),
+                    new CallOptions(headers: metadataProvider.GetMetadata(), cancellationToken: cancellationTokenSource.Token));
                 await responseAction(JsonSerializer.Serialize(response, options));
             },
             responseAction);
@@ -49,11 +53,12 @@ namespace BlazorFly.Grpc.Utils
             string requestValue,
             CancellationTokenSource cancellationTokenSource,
             JsonSerializerOptions options,
-            Func<string, Task> responseAction)
+            Func<string, Task> responseAction,
+            IGrpcMetadataProvider metadataProvider)
         {
             ExecuteAndLogError(async () =>
             {
-                var clientStreamingCall = requestAction(new CallOptions(cancellationToken: cancellationTokenSource.Token));
+                var clientStreamingCall = requestAction(new CallOptions(headers: metadataProvider.GetMetadata(), cancellationToken: cancellationTokenSource.Token));
                 var requests = JsonSerializer.Deserialize<List<TRequest>>(requestValue);
                 var requestStream = clientStreamingCall.RequestStream;
 
@@ -77,12 +82,13 @@ namespace BlazorFly.Grpc.Utils
             CancellationTokenSource cancellationTokenSource,
             JsonSerializerOptions options,
             Func<string> responseValueGetter,
-            Func<string, Task> responseAction)
+            Func<string, Task> responseAction,
+            IGrpcMetadataProvider metadataProvider)
         {
             ExecuteAndLogError(async () =>
             {
                 var request = JsonSerializer.Deserialize<TRequest>(requestValue);
-                var serverStream = requestAction(request, new CallOptions(cancellationToken: cancellationTokenSource.Token)).ResponseStream;
+                var serverStream = requestAction(request, new CallOptions(headers: metadataProvider.GetMetadata(), cancellationToken: cancellationTokenSource.Token)).ResponseStream;
 
                 while (await serverStream.MoveNext(cancellationTokenSource.Token))
                 {
@@ -99,12 +105,13 @@ namespace BlazorFly.Grpc.Utils
             CancellationTokenSource cancellationTokenSource,
             JsonSerializerOptions options,
             Func<string> responseValueGetter,
-            Func<string, Task> responseAction)
+            Func<string, Task> responseAction,
+            IGrpcMetadataProvider metadataProvider)
         {
             ExecuteAndLogError(async () =>
             {
                 var requests = JsonSerializer.Deserialize<List<TRequest>>(requestValue);
-                var duplexCall = requestAction(new CallOptions(cancellationToken: cancellationTokenSource.Token));
+                var duplexCall = requestAction(new CallOptions(headers: metadataProvider.GetMetadata(), cancellationToken: cancellationTokenSource.Token));
                 var clientStream = duplexCall.RequestStream;
                 var serverStream = duplexCall.ResponseStream;
 
@@ -131,6 +138,9 @@ namespace BlazorFly.Grpc.Utils
                 try
                 {
                     await requestProcessing();
+                }
+                catch (RpcException e) when (e.Status.StatusCode == StatusCode.Cancelled)
+                {
                 }
                 catch (Exception e)
                 {

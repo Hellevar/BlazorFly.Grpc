@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using BlazorFly.Grpc.Extensions;
+using BlazorFly.Grpc.Internal;
 using BlazorFly.Grpc.Utils;
 using Grpc.Core;
 using Microsoft.AspNetCore.Components;
@@ -16,13 +17,12 @@ namespace BlazorFly.Grpc.Builders
 {
     internal class ComponentBuilder
     {
-        public Type Build(Type clientType)
+        public Type Build(ICollection<Type> clientTypes)
         {
-            var clientMethods = ExtractGrpcMethods(clientType);
-
             var typeBuilder = CreateComponentType();
 
             var implementedMethods = 0;
+            var sharedLines = 0;
 
             var jsonOptionsProperty = CreateJsonOptionsProperty(typeBuilder);
 
@@ -30,7 +30,7 @@ namespace BlazorFly.Grpc.Builders
                 .DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes)
                 .StartBuilding(jsonOptionsProperty.GetSetMethod());
 
-            var grpcClientProperty = CreateGrpcClientProperty(typeBuilder, clientType);
+            var metadataProviderProperty = CreateInjectedProperty(typeBuilder, typeof(IGrpcMetadataProvider));
 
             var renderMethod = typeBuilder.DefineMethod(
                 "BuildRenderTree",
@@ -38,15 +38,24 @@ namespace BlazorFly.Grpc.Builders
                 typeof(void), new[] { typeof(RenderTreeBuilder) });
 
             var renderMethodBuilder = new RenderMethodBuilder(renderMethod.GetILGenerator());
-            StartSharedRenderBlock(renderMethodBuilder, clientType);
+            StartSharedRenderBlock(renderMethodBuilder, ref sharedLines);
 
-            foreach (var method in clientMethods)
+            foreach (var clientType in clientTypes)
             {
-                BuildMethodBlock(typeBuilder, renderMethodBuilder, grpcClientProperty, jsonOptionsProperty, implementedMethods, method, constructorBuilder);
-                implementedMethods++;
-            }
+                StartClientRenderBlock(renderMethodBuilder, clientType, ref sharedLines);
+                var grpcClientProperty = CreateInjectedProperty(typeBuilder, clientType);
+                var clientMethods = ExtractGrpcMethods(clientType);
 
-            FinishSharedRenderBlock(renderMethodBuilder);
+                foreach (var method in clientMethods)
+                {
+                    BuildMethodBlock(typeBuilder, renderMethodBuilder, grpcClientProperty, jsonOptionsProperty, implementedMethods, method, constructorBuilder, metadataProviderProperty);
+                    implementedMethods++;
+                }
+
+                FinishClientRenderBlock(renderMethodBuilder, ref sharedLines);
+            }            
+
+            FinishSharedRenderBlock(renderMethodBuilder, ref sharedLines);
 
             renderMethodBuilder.Build();
             constructorBuilder.FinishBuilding();
@@ -90,30 +99,38 @@ namespace BlazorFly.Grpc.Builders
             return typeBuilder;
         }
 
-        private void StartSharedRenderBlock(RenderMethodBuilder renderMethodBuilder, Type clientType)
+        private void StartSharedRenderBlock(RenderMethodBuilder renderMethodBuilder, ref int sharedLines)
         {
-            renderMethodBuilder.AddMarkupContent(0, "<style>\r\n    .hidden {\r\n        visibility: collapse;\r\n        height: 0px;\r\n        padding: 0px !important;\r\n    }\r\n\r\n    .visible {\r\n        visibility: visible;\r\n        height: 100%;\r\n        transition: height 5s;\r\n    }\r\n\r\n    .clients {\r\n        display: grid;\r\n        grid-row-gap: 40px;\r\n    }\r\n\r\n    .clientHeader {\r\n        font-weight: bold;\r\n        display: inline;\r\n    }\r\n\r\n    .clientDescription {\r\n        display: inline;\r\n    }\r\n\r\n    .clientMethods {\r\n        margin-top: 20px;\r\n        display: grid;\r\n        grid-row-gap: 20px;\r\n    }\r\n\r\n    .methodData {\r\n        border-radius: 5px;\r\n        border: 1px solid;\r\n    }\r\n\r\n    .methodData.unaryCall {\r\n        background: rgba(60, 145, 230, 0.1);\r\n        border-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .methodData.unaryCall .methodBody {\r\n        border-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .methodData.clientStreaming {\r\n        background: rgba(159, 211, 86, 0.1);\r\n        border-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .methodData.clientStreaming .methodBody {\r\n        border-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .methodData.serverStreaming {\r\n        background: rgba(255, 190, 11, 0.1);\r\n        border-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .methodData.serverStreaming .methodBody {\r\n        border-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .methodData.duplexStreaming {\r\n        background: rgba(251, 86, 7, 0.1);\r\n        border-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .methodData.duplexStreaming .methodBody {\r\n        border-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .methodHeader {\r\n        cursor: pointer;\r\n        display: inline-block;\r\n        width: 100%;\r\n    }\r\n\r\n    .methodType {\r\n        text-transform: uppercase;\r\n        text-align: center;\r\n        width: 200px;\r\n        color: whitesmoke;\r\n        border-radius: 5px;\r\n        display: inherit;\r\n        margin: 5px;\r\n        padding: 5px;\r\n    }\r\n\r\n    .methodType.unaryCall {\r\n        background-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .methodType.clientStreaming {\r\n        background-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .methodType.serverStreaming {\r\n        background-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .methodType.duplexStreaming {\r\n        background-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .methodDescription {\r\n        display: inherit;\r\n    }\r\n\r\n    .methodBody {\r\n        padding: 20px;\r\n        display: grid;\r\n        border-top: 1px solid;\r\n        grid-template-columns: 1fr 1fr 1fr;\r\n        grid-template-rows: 200px 50px 200px;\r\n        grid-row-gap: 20px;\r\n        grid-column-gap: 20px;\r\n    }\r\n\r\n    .requestLabel {\r\n        grid-row-start: 1;\r\n        grid-row-end: 2;\r\n        grid-column-start: 1;\r\n        grid-column-end: 2;\r\n    }\r\n\r\n    .requestValue {\r\n        grid-row-start: 1;\r\n        grid-row-end: 2;\r\n        grid-column-start: 2;\r\n        grid-column-end: 4;\r\n        border-radius: 5px;\r\n        border: 1px solid;\r\n    }\r\n\r\n    .requestValue.unaryCall {\r\n        border-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .requestValue.clientStreaming {\r\n        border-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .requestValue.serverStreaming {\r\n        border-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .requestValue.duplexStreaming {\r\n        border-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .requestButton {\r\n        grid-row-start: 2;\r\n        grid-row-end: 3;\r\n        text-align: center;\r\n        text-transform: uppercase;\r\n        border: none;\r\n        color: white;\r\n        border-radius: 5px;\r\n    }\r\n\r\n    .requestButton.execute {\r\n        grid-column-start: 1;\r\n        grid-column-end: 2;\r\n    }\r\n\r\n    .requestButton.clear {\r\n        grid-column-start: 2;\r\n        grid-column-end: 3;\r\n    }\r\n\r\n    .requestButton.cancel {\r\n        grid-column-start: 3;\r\n        grid-column-end: 4;\r\n    }\r\n\r\n    .requestButton.unaryCall {\r\n        background-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .requestButton.clientStreaming {\r\n        background-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .requestButton.serverStreaming {\r\n        background-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .requestButton.duplexStreaming {\r\n        background-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .responseLabel {\r\n        grid-row-start: 3;\r\n        grid-row-end: 4;\r\n        grid-column-start: 1;\r\n        grid-column-end: 2;\r\n    }\r\n\r\n    .responseValue {\r\n        grid-row-start: 3;\r\n        grid-row-end: 4;\r\n        grid-column-start: 2;\r\n        grid-column-end: 4;\r\n        background-color: white;\r\n        border-radius: 5px;\r\n        border: 1px solid;\r\n    }\r\n\r\n    .responseValue.unaryCall {\r\n        border-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .responseValue.clientStreaming {\r\n        border-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .responseValue.serverStreaming {\r\n        border-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .responseValue.duplexStreaming {\r\n        border-color: rgba(251, 86, 7, 1);\r\n    }\r\n</style>\r\n\r\n")
-            .OpenElement(1, "div")
-            .AddAttribute(2, "class", "clients")
-            .AddMarkupContent(3, "\r\n")
-            .OpenElement(4, "div")
-            .AddAttribute(5, "class", "client")
-            .AddMarkupContent(6, "\r\n")
-            .AddMarkupContent(7, $"<div class=\"clientHeader\">{clientType.Name}</div>\r\n")
-            .AddMarkupContent(8, "<div class=\"clientDescription\">Contains all mapped gRPC methods</div>\r\n")
-            .OpenElement(9, "div")
-            .AddAttribute(10, "class", "clientMethods")
-            .AddMarkupContent(11, "\r\n");
+            renderMethodBuilder.AddMarkupContent(sharedLines++, "<style>\r\n    .hidden {\r\n        visibility: collapse;\r\n        height: 0px;\r\n        padding: 0px !important;\r\n    }\r\n\r\n    .visible {\r\n        visibility: visible;\r\n        height: 100%;\r\n        transition: height 5s;\r\n    }\r\n\r\n    .clients {\r\n        display: grid;\r\n        grid-row-gap: 40px;\r\n    }\r\n\r\n    .clientHeader {\r\n        font-weight: bold;\r\n        display: inline;\r\n    }\r\n\r\n    .clientDescription {\r\n        display: inline;\r\n    }\r\n\r\n    .clientMethods {\r\n        margin-top: 20px;\r\n        display: grid;\r\n        grid-row-gap: 20px;\r\n    }\r\n\r\n    .methodData {\r\n        border-radius: 5px;\r\n        border: 1px solid;\r\n    }\r\n\r\n    .methodData.unaryCall {\r\n        background: rgba(60, 145, 230, 0.1);\r\n        border-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .methodData.unaryCall .methodBody {\r\n        border-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .methodData.clientStreaming {\r\n        background: rgba(159, 211, 86, 0.1);\r\n        border-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .methodData.clientStreaming .methodBody {\r\n        border-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .methodData.serverStreaming {\r\n        background: rgba(255, 190, 11, 0.1);\r\n        border-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .methodData.serverStreaming .methodBody {\r\n        border-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .methodData.duplexStreaming {\r\n        background: rgba(251, 86, 7, 0.1);\r\n        border-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .methodData.duplexStreaming .methodBody {\r\n        border-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .methodHeader {\r\n        cursor: pointer;\r\n        display: inline-block;\r\n        width: 100%;\r\n    }\r\n\r\n    .methodType {\r\n        text-transform: uppercase;\r\n        text-align: center;\r\n        width: 200px;\r\n        color: whitesmoke;\r\n        border-radius: 5px;\r\n        display: inherit;\r\n        margin: 5px;\r\n        padding: 5px;\r\n    }\r\n\r\n    .methodType.unaryCall {\r\n        background-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .methodType.clientStreaming {\r\n        background-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .methodType.serverStreaming {\r\n        background-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .methodType.duplexStreaming {\r\n        background-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .methodDescription {\r\n        display: inherit;\r\n    }\r\n\r\n    .methodBody {\r\n        padding: 20px;\r\n        display: grid;\r\n        border-top: 1px solid;\r\n        grid-template-columns: 1fr 1fr 1fr;\r\n        grid-template-rows: 200px 50px 200px;\r\n        grid-row-gap: 20px;\r\n        grid-column-gap: 20px;\r\n    }\r\n\r\n    .requestLabel {\r\n        grid-row-start: 1;\r\n        grid-row-end: 2;\r\n        grid-column-start: 1;\r\n        grid-column-end: 2;\r\n    }\r\n\r\n    .requestValue {\r\n        grid-row-start: 1;\r\n        grid-row-end: 2;\r\n        grid-column-start: 2;\r\n        grid-column-end: 4;\r\n        border-radius: 5px;\r\n        border: 1px solid;\r\n    }\r\n\r\n    .requestValue.unaryCall {\r\n        border-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .requestValue.clientStreaming {\r\n        border-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .requestValue.serverStreaming {\r\n        border-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .requestValue.duplexStreaming {\r\n        border-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .requestButton {\r\n        grid-row-start: 2;\r\n        grid-row-end: 3;\r\n        text-align: center;\r\n        text-transform: uppercase;\r\n        border: none;\r\n        color: white;\r\n        border-radius: 5px;\r\n    }\r\n\r\n    .requestButton.execute {\r\n        grid-column-start: 1;\r\n        grid-column-end: 2;\r\n    }\r\n\r\n    .requestButton.clear {\r\n        grid-column-start: 2;\r\n        grid-column-end: 3;\r\n    }\r\n\r\n    .requestButton.cancel {\r\n        grid-column-start: 3;\r\n        grid-column-end: 4;\r\n    }\r\n\r\n    .requestButton.unaryCall {\r\n        background-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .requestButton.clientStreaming {\r\n        background-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .requestButton.serverStreaming {\r\n        background-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .requestButton.duplexStreaming {\r\n        background-color: rgba(251, 86, 7, 1);\r\n    }\r\n\r\n    .responseLabel {\r\n        grid-row-start: 3;\r\n        grid-row-end: 4;\r\n        grid-column-start: 1;\r\n        grid-column-end: 2;\r\n    }\r\n\r\n    .responseValue {\r\n        grid-row-start: 3;\r\n        grid-row-end: 4;\r\n        grid-column-start: 2;\r\n        grid-column-end: 4;\r\n        background-color: white;\r\n        border-radius: 5px;\r\n        border: 1px solid;\r\n    }\r\n\r\n    .responseValue.unaryCall {\r\n        border-color: rgba(60, 145, 230, 1);\r\n    }\r\n\r\n    .responseValue.clientStreaming {\r\n        border-color: rgba(159, 211, 86, 1);\r\n    }\r\n\r\n    .responseValue.serverStreaming {\r\n        border-color: rgba(255, 190, 11, 1);\r\n    }\r\n\r\n    .responseValue.duplexStreaming {\r\n        border-color: rgba(251, 86, 7, 1);\r\n    }\r\n</style>\r\n\r\n")
+                .OpenElement(sharedLines++, "div")
+                .AddAttribute(sharedLines++, "class", "clients")
+                .AddMarkupContent(sharedLines++, "\r\n");
         }
 
-        private void FinishSharedRenderBlock(RenderMethodBuilder renderMethodBuilder)
+        private void StartClientRenderBlock(RenderMethodBuilder renderMethodBuilder, Type clientType, ref int sharedLines)
         {
-            renderMethodBuilder.AddMarkupContent(12, "\r\n")
-            .CloseElement()
-            .AddMarkupContent(13, "\r\n")
-            .CloseElement()
-            .AddMarkupContent(14, "\r\n")
-            .CloseElement();
+            renderMethodBuilder.OpenElement(sharedLines++, "div")
+                .AddAttribute(sharedLines++, "class", "client")
+                .AddMarkupContent(sharedLines++, "\r\n")
+                .AddMarkupContent(sharedLines++, $"<div class=\"clientHeader\">{clientType.Name}</div>\r\n")
+                .AddMarkupContent(sharedLines++, "<div class=\"clientDescription\">Contains all mapped gRPC methods</div>\r\n")
+                .OpenElement(sharedLines++, "div")
+                .AddAttribute(sharedLines++, "class", "clientMethods")
+                .AddMarkupContent(sharedLines++, "\r\n");
+        }
+
+        private void FinishClientRenderBlock(RenderMethodBuilder renderMethodBuilder, ref int sharedLines)
+        {
+            renderMethodBuilder.AddMarkupContent(sharedLines++, "\r\n")
+                .CloseElement()
+                .AddMarkupContent(sharedLines++, "\r\n")
+                .CloseElement();
+        }
+
+        private void FinishSharedRenderBlock(RenderMethodBuilder renderMethodBuilder, ref int sharedLines)
+        {
+            renderMethodBuilder.AddMarkupContent(sharedLines++, "\r\n")
+                .CloseElement();
         }
 
         private void BuildMethodBlock(
@@ -123,7 +140,8 @@ namespace BlazorFly.Grpc.Builders
             PropertyBuilder jsonOptionsProperty,
             int implementedMethods,
             MethodInfo method,
-            ConstructorBuilder constructorBuilder)
+            ConstructorBuilder constructorBuilder,
+            PropertyBuilder metadataProviderProperty)
         {
             var clientMethodType = method.GetClientMethodType();
             var methodTypeName = clientMethodType.ToString();
@@ -170,7 +188,9 @@ namespace BlazorFly.Grpc.Builders
                     method,
                     setResponseWithNotifyMethod,
                     requestType,
-                    responseType);
+                    responseType,
+                    metadataProviderProperty,
+                    clearResponseMethod);
 
             var methodType = methodTypeName.Substring(0, 1).ToLowerInvariant() + methodTypeName.Substring(1, methodTypeName.Length - 1);
 
@@ -182,7 +202,7 @@ namespace BlazorFly.Grpc.Builders
                 .AddAttribute(4, "class", "methodHeader")
                 .AddAttribute(5, "onclick", invertBlockVisibilityMethod)
                 .AddMarkupContent(6, "\r\n")
-                .AddMarkupContent(7, $"<div class=\"methodType {methodType}\">{methodTypeName}</div>\r\n")
+                .AddMarkupContent(7, $"<div class=\"methodType {methodType}\">{clientMethodType.GetNormalizedName()}</div>\r\n")
                 .AddMarkupContent(8, $"<div class=\"methodDescription\">{method.Name} method</div>\r\n")
                 .CloseElement()
                 .AddMarkupContent(9, "\r\n")
@@ -241,15 +261,14 @@ namespace BlazorFly.Grpc.Builders
             return jsonOptionsProperty;
         }
 
-        private PropertyBuilder CreateGrpcClientProperty(TypeBuilder typeBuilder, Type clientType)
+        private PropertyBuilder CreateInjectedProperty(TypeBuilder typeBuilder, Type propertyType)
         {
-            var grpcClientPropertyType = clientType;
-            var grpcClientPropertyName = clientType.Name;
-            var grpcClientField = typeBuilder.DefineField($"_{grpcClientPropertyName}", grpcClientPropertyType, FieldAttributes.Private);
+            var propertyName = propertyType.Name;
+            var field = typeBuilder.DefineField($"_{propertyName}", propertyType, FieldAttributes.Private);
             var grpcClientProperty = typeBuilder
-                .DefineProperty(grpcClientPropertyName, PropertyAttributes.None, grpcClientPropertyType, Type.EmptyTypes)
-                .ImplementSetter(typeBuilder, grpcClientField)
-                .ImplementGetter(typeBuilder, grpcClientField);
+                .DefineProperty(propertyName, PropertyAttributes.None, propertyType, Type.EmptyTypes)
+                .ImplementSetter(typeBuilder, field)
+                .ImplementGetter(typeBuilder, field);
             grpcClientProperty.SetCustomAttribute(new CustomAttributeBuilder(typeof(InjectAttribute).GetConstructor(Type.EmptyTypes), Array.Empty<object>()));
 
             return grpcClientProperty;

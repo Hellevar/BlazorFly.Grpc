@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using BlazorFly.Grpc.Internal;
 using BlazorFly.Grpc.Tests.Core;
 using Grpc.Core;
@@ -13,12 +15,17 @@ namespace BlazorFly.Grpc.Tests.UnitTests
     {
         private readonly TestHost host = new TestHost();
 
+        public ComponentTests()
+        {
+            host.AddService<IGrpcViewTypeProvider>(new GrpcViewTypeProvider(new List<Type> { typeof(TestService.TestServiceClient) }));
+            host.AddService<IGrpcMetadataProvider>(new GrpcMetadataProvider(new Metadata()));
+        }
+
         [Fact]
         public void ExecuteUnaryCall_WhenItMapped_ShouldUpdateResponseMarkup()
         {
             // Arrange
-            const string ExpectedMessage = "Unusual Markup Message Unary Call";
-            host.AddService<IGrpcViewTypeProvider>(new GrpcViewTypeProvider(typeof(TestService.TestServiceClient)));
+            const string ExpectedMessage = "Unusual Markup Message Unary Call";            
 
             var clientMock = new Mock<TestService.TestServiceClient>();
             clientMock.Setup(m => m.UnaryCallAsync(It.IsAny<HelloRequest>(), It.IsAny<CallOptions>()))
@@ -46,7 +53,6 @@ namespace BlazorFly.Grpc.Tests.UnitTests
         {
             // Arrange
             const string ExpectedMessage = "Unusual Markup Message Client Streaming";
-            host.AddService<IGrpcViewTypeProvider>(new GrpcViewTypeProvider(typeof(TestService.TestServiceClient)));
 
             var clientMock = new Mock<TestService.TestServiceClient>();
             clientMock.Setup(m => m.ClientStreaming(It.IsAny<CallOptions>()))
@@ -75,7 +81,6 @@ namespace BlazorFly.Grpc.Tests.UnitTests
         {
             // Arrange
             const string ExpectedMessage = "Unusual Markup Message Server Streaming";
-            host.AddService<IGrpcViewTypeProvider>(new GrpcViewTypeProvider(typeof(TestService.TestServiceClient)));
 
             var clientMock = new Mock<TestService.TestServiceClient>();
             clientMock.Setup(m => m.ServerStreaming(It.IsAny<HelloRequest>(), It.IsAny<CallOptions>()))
@@ -103,7 +108,6 @@ namespace BlazorFly.Grpc.Tests.UnitTests
         {
             // Arrange
             const string ExpectedMessage = "Unusual Markup Message Duplex Streaming";
-            host.AddService<IGrpcViewTypeProvider>(new GrpcViewTypeProvider(typeof(TestService.TestServiceClient)));
 
             var clientMock = new Mock<TestService.TestServiceClient>();
             clientMock.Setup(m => m.DuplexStreaming(It.IsAny<CallOptions>()))
