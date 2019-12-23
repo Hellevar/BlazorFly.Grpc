@@ -1,4 +1,5 @@
 # BlazorFly.Grpc ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Hellevar/BlazorFly.Grpc/Deploy%20package%20to%20Nuget/master)
+[![NuGet](https://img.shields.io/nuget/v/BlazorFly.Grpc.svg)](https://www.nuget.org/packages/BlazorFly.Grpc/)
 BlazorFly.Grpc is a library for manual testing of your gRPC services through Blazor-based generated UI. The main goal is to provide easy to install and integrate library with simple UI and intuitive usage.
 
 ## Notes
